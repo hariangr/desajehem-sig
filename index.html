@@ -1,0 +1,101 @@
+  <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angseri Maps</title>
+  <link rel="icon" type="image/png" href="../assets/img/logo/angseri.png"/>
+
+  <!-- CSS only -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- JS, Popper.js, and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous">
+  </script>
+
+  <!-- P5js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/p5.min.js"></script>
+
+  <!-- DOM Addon -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/addons/p5.dom.min.js"></script>
+
+  <!-- Sound Addon -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.4/addons/p5.sound.min.js"></script>
+
+  <!-- Mappa -->
+  <script src="https://cdn.jsdelivr.net/npm/mappa-mundi@0.0.4"></script>
+
+  <!-- Markdown-it -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@10.0.0/dist/markdown-it.min.js"></script>
+
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/expandable.css" />
+</head>
+
+<body>
+  <div id="loadingIndicator" class="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="canvas_container"></div>
+
+  <div class="sidebarContainer hideLoading" id="sidebarx">
+    <div class="sidebar scrollbar-styled">
+      <div id="titlehead">
+        <img id="logo-icon" alt="Desa Logo"
+          src="../assets/img/logo/angseri.png" />
+        <div class="sidebar-title">
+          <h4>Desa Angseri</h4>
+          <p>Smart Village</p>
+          <a href="../index.html">KEMBALI KE BERANDA</a>
+        </div>
+      </div>
+      <hr>
+
+      <div class="collapsible">Wilayah</div>
+      <div id="banjarHierarchy" class="content"></div>
+      <hr>
+
+      <div class="collapsible">Kategori</div>
+      <div id="catHierarchy" class="content"></div>
+
+      <div class="bottomPadder"></div>
+    </div>
+  </div>
+
+  <script src="utils.js"></script>
+  <script src="app.js"></script>
+  <script src="hamburger.js"></script>
+
+  <!-- <img  src="list.svg" alt="hamburger menu" /> -->
+  <div id="hamburgerMenu">
+    <span class="bars">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </span>
+  </div>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modal-detail" class="scrollbar-styled">Some text in the Modal..</div>
+    </div>
+  </div>
+</body>
+
+</html>
