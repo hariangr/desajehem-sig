@@ -95,7 +95,10 @@ label {
   margin-right: 12px;
 }
 
-.sidebar-title h4,
+.sidebar-title h4 {
+  margin-bottom: 0.3rem;
+}
+
 .sidebar-title p {
   margin-bottom: 0;
 }
