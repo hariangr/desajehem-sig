@@ -1,6 +1,8 @@
 const mappa = new Mappa("Leaflet");
 
 const baseUrl = "https://angseri.herokuapp.com";
+const baseSheet = "https://sheets.googleapis.com/v4/spreadsheets/1qM0BKuyzatI_v2LJr4tgo0Nl5cAlVl1850KmoDhnVco/values"
+const apiKey = "AIzaSyAA4WB41zB6JjoxoK9cB7qK-rtkbQsqpss"
 
 const defaultColor = "#007bff";
 
@@ -20,9 +22,9 @@ let itemsToShow = [];
 let isLoading = true;
 
 const options = {
-  lat: -8.3258226,
-  lng: 115.1571415,
-  zoom: 13,
+  lat: -8.4327307,
+  lng: 115.3687399,
+  zoom: 13.5,
   style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
 };
 
@@ -176,19 +178,14 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   // Counternya
   var _count = document.createElement("span");
   if (id == "tanpa-kategori") {
-    console.log("aa1");
     _count.innerText = " (" + categoryCounter["undefined"] + ")";
   } else if (id == "tanpa-banjar") {
-    console.log("aa2");
     _count.innerText = " (" + banjarCounter["undefined"] + ")";
   } else if (Object.keys(categoryCounter).includes(id)) {
-    console.log("aa3");
     _count.innerText = " (" + categoryCounter[id] + ")";
   } else if (Object.keys(banjarCounter).includes(id)) {
-    console.log("aa4");
     _count.innerText = " (" + banjarCounter[id] + ")";
   } else {
-    console.log("aa5");
     _cont.classList.add("line-through");
     _label.classList.add("line-through");
   }
@@ -208,7 +205,6 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
 
   document.getElementById(containerId).appendChild(_cont);
 
-  console.log({ id, text, containerId });
   if (subs) {
     createCheckboxes(level + 1, subs, "catHierarchy");
   }
@@ -227,7 +223,7 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
     if (showAllCategoryDefault) categoryToShow.push(uncategorized.id);
   }
   for (const it of cats) {
-    let _color;
+    let _color = "#ff0000";
     if (it.color) _color = it.color;
 
     appendCheckbox(it.id, it.name, level, it.subs, containerId, _color);
@@ -237,14 +233,20 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
   refreshItemsToShow();
 }
 
+async function authenticatedGet(endpoint) {
+  return fetch(`${endpoint}?key=${apiKey}`)
+}
+
 async function preload() {
   document
     .getElementById("hamburgerMenu")
     .addEventListener("click", onHamburgerClicked);
 
   isLoading = true;
-  const getRegions = await fetch(baseUrl + "/sv-regions");
-  regionAreas = await getRegions.json();
+  // const getRegions = await fetch(baseUrl + "/sv-regions");
+  // regionAreas = await getRegions.json();
+  regionAreas = await (await authenticatedGet(baseSheet + "/Wilayah!A2:B")).json()
+  console.log(regionAreas);
 
   const getItems = await fetch(baseUrl + "/sv-items");
   itemsAll = await getItems.json();
@@ -287,7 +289,7 @@ function draw() {
   fill(0, 125, 255);
   noStroke();
 
-  if (regionAreas && regionAreas.length > 0) drawRegionAreas();
+  if (regionAreas && regionAreas.values.length > 0) drawRegionAreas();
   if (itemsToShow && itemsToShow.length > 0) drawItems();
 }
 
@@ -325,21 +327,21 @@ function drawItems() {
 function drawRegionAreas() {
   push();
 
-  for (const areas of regionAreas) {
-    if (areas.hex_color) {
-      fill(areas.hex_color);
-    } else {
-      // Default fill color
-      fill(125, 125, 255, 128);
-    }
-
-    beginShape();
-    for (const it of areas.coordinate_list) {
-      const pix = trainMap.latLngToPixel(it[1], it[0]);
-      vertex(pix.x, pix.y);
-    }
-    endShape(p5.CLOSE);
+  // for (const areas of regionAreas.values) {
+  if (regionAreas.hex_color) {
+    fill(regionAreas.hex_color);
+  } else {
+    // Default fill color
+    fill(125, 125, 255, 128);
   }
+
+  beginShape();
+  for (const it of regionAreas.values) {
+    const pix = trainMap.latLngToPixel(Number(it[0]), Number(it[1]));
+    vertex(pix.x, pix.y);
+  }
+  endShape(p5.CLOSE);
+  // }
 
   pop();
 }
