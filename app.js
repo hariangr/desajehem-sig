@@ -233,43 +233,67 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
   refreshItemsToShow();
 }
 
+function transformToObject(data) {
+  const [header, ...rest] = data
+
+  const output = []
+  for (let i = 0; i < rest.length; i++) {
+    const d = {}
+    for (let keyI = 0; keyI < header.length; keyI++) {
+      const key = header[keyI]
+      d[key] = rest[i][keyI]
+    }
+    output.push(d)
+  }
+  return output
+}
+
 async function authenticatedGet(endpoint) {
   return fetch(`${endpoint}?key=${apiKey}`)
 }
 
 async function preload() {
+  async function loadRegionArea() {
+    const regionRes = (await (await authenticatedGet(baseSheet + "/Wilayah!A:B")).json()).values
+    regionAreas = transformToObject(regionRes)
+  }
+
+  async function loadBanjars() {
+
+    // const getBanjars = await fetch(baseUrl + "/sv-banjars");
+    // banjarCounter = await getHierarchyJson["banjars"];
+    const getBanjars = await authenticatedGet(baseSheet + "/Wilayah Bagian!A2:B")
+    banjarAll = await getBanjars.json();
+    // createCheckboxes(0, banjarAll, "banjarHierarchy", {
+    //   id: "tanpa-banjar",
+    //   name: "Tanpa Banjar",
+    // });
+    console.log({banjarAll});
+  }
+
   document
     .getElementById("hamburgerMenu")
     .addEventListener("click", onHamburgerClicked);
 
   isLoading = true;
-  // const getRegions = await fetch(baseUrl + "/sv-regions");
-  // regionAreas = await getRegions.json();
-  regionAreas = await (await authenticatedGet(baseSheet + "/Wilayah!A2:B")).json()
-  console.log(regionAreas);
+  await loadRegionArea()
+  await loadBanjars()
 
-  const getItems = await fetch(baseUrl + "/sv-items");
-  itemsAll = await getItems.json();
+  // const getItems = await fetch(baseUrl + "/sv-items");
+  // itemsAll = await getItems.json();
 
-  const getHierarchy = await fetch(
-    baseUrl + "/sv-categories/hierarchywithcount"
-  );
-  const getHierarchyJson = await getHierarchy.json();
+  // const getHierarchy = await fetch(
+  //   baseUrl + "/sv-categories/hierarchywithcount"
+  // );
+  // const getHierarchyJson = await getHierarchy.json();
 
-  const getBanjars = await fetch(baseUrl + "/sv-banjars");
-  banjarCounter = await getHierarchyJson["banjars"];
-  banjarAll = await getBanjars.json();
-  createCheckboxes(0, banjarAll, "banjarHierarchy", {
-    id: "tanpa-banjar",
-    name: "Tanpa Banjar",
-  });
 
-  categoryHierarchy = await getHierarchyJson["categories"];
-  categoryCounter = await getHierarchyJson["counter"];
-  createCheckboxes(0, categoryHierarchy, "catHierarchy", {
-    id: "tanpa-kategori",
-    name: "Tanpa Kategori",
-  });
+  // categoryHierarchy = await getHierarchyJson["categories"];
+  // categoryCounter = await getHierarchyJson["counter"];
+  // createCheckboxes(0, categoryHierarchy, "catHierarchy", {
+  //   id: "tanpa-kategori",
+  //   name: "Tanpa Kategori",
+  // });
 
   isLoading = false;
   document.getElementById("loadingIndicator").classList.add("hideLoading");
@@ -289,7 +313,7 @@ function draw() {
   fill(0, 125, 255);
   noStroke();
 
-  if (regionAreas && regionAreas.values.length > 0) drawRegionAreas();
+  if (regionAreas && regionAreas.length > 0) drawRegionAreas();
   if (itemsToShow && itemsToShow.length > 0) drawItems();
 }
 
@@ -327,21 +351,18 @@ function drawItems() {
 function drawRegionAreas() {
   push();
 
-  // for (const areas of regionAreas.values) {
   if (regionAreas.hex_color) {
     fill(regionAreas.hex_color);
   } else {
-    // Default fill color
     fill(125, 125, 255, 128);
   }
 
   beginShape();
-  for (const it of regionAreas.values) {
-    const pix = trainMap.latLngToPixel(Number(it[0]), Number(it[1]));
+  for (const it of regionAreas) {
+    const pix = trainMap.latLngToPixel(Number(it.Lat), Number(it.Lon));
     vertex(pix.x, pix.y);
   }
   endShape(p5.CLOSE);
-  // }
 
   pop();
 }
