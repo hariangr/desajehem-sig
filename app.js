@@ -284,15 +284,15 @@ async function preload() {
     // console.log({catAll, poiAll, rootLevel});
     categoryHierarchy = rootLevel
 
-  // const getHierarchy = await fetch(
-  //   baseUrl + "/sv-categories/hierarchywithcount"
-  // );
-  // const getHierarchyJson = await getHierarchy.json();
+    // const getHierarchy = await fetch(
+    //   baseUrl + "/sv-categories/hierarchywithcount"
+    // );
+    // const getHierarchyJson = await getHierarchy.json();
 
 
-  // categoryHierarchy = await getHierarchyJson["categories"];
-  // categoryCounter = await getHierarchyJson["counter"];
-  createCheckboxes(0, categoryHierarchy, "catHierarchy");
+    // categoryHierarchy = await getHierarchyJson["categories"];
+    // categoryCounter = await getHierarchyJson["counter"];
+    createCheckboxes(0, categoryHierarchy, "catHierarchy");
   }
 
   document
