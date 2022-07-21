@@ -24,7 +24,7 @@ let isLoading = true;
 const options = {
   lat: -8.4327307,
   lng: 115.3687399,
-  zoom: 13.5,
+  zoom: 13,
   style: "http://{s}.tile.osm.org/{z}/{x}/{y}.png",
 };
 
@@ -226,7 +226,7 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
     let _color = "#ff0000";
     if (it.color) _color = it.color;
 
-    appendCheckbox(it.id, it.name, level, it.subs, containerId, _color);
+    appendCheckbox(it.No, it.Nama, level, it.subs, containerId, _color);
     if (showAllCategoryDefault) categoryToShow.push(it.id);
   }
 
@@ -259,16 +259,30 @@ async function preload() {
   }
 
   async function loadBanjars() {
+    const getBanjars = await authenticatedGet(baseSheet + "/Wilayah Bagian!A:B")
+    banjarAll = transformToObject((await getBanjars.json()).values);
+    createCheckboxes(0, banjarAll, "banjarHierarchy", {
+      No: "tanpa-banjar",
+      Nama: "Tanpa Banjar",
+    });
+  }
 
-    // const getBanjars = await fetch(baseUrl + "/sv-banjars");
-    // banjarCounter = await getHierarchyJson["banjars"];
-    const getBanjars = await authenticatedGet(baseSheet + "/Wilayah Bagian!A2:B")
-    banjarAll = await getBanjars.json();
-    // createCheckboxes(0, banjarAll, "banjarHierarchy", {
-    //   id: "tanpa-banjar",
-    //   name: "Tanpa Banjar",
-    // });
-    console.log({banjarAll});
+  async function loadCategory() {
+    const getCategories = await authenticatedGet(baseSheet + "/Kategori!A:B")
+    catAll = transformToObject((await getCategories.json()).values);
+
+    // Root level
+    const rootLevel = catAll.filter((v) => !v['Parent'])
+    // Level 1
+    for (const cat in rootLevel) {
+      rootLevel[cat]['Subs'] = catAll.filter((v) => v['Parent'] && v['Parent'] === rootLevel[cat]['Nama'])
+    }
+
+    const getPoi = await authenticatedGet(baseSheet + "/POI!A:G")
+    poiAll = transformToObject((await getPoi.json()).values);
+
+    // categoryHierarchy
+    console.log({catAll, poiAll, rootLevel});
   }
 
   document
@@ -278,6 +292,7 @@ async function preload() {
   isLoading = true;
   await loadRegionArea()
   await loadBanjars()
+  await loadCategory()
 
   // const getItems = await fetch(baseUrl + "/sv-items");
   // itemsAll = await getItems.json();
