@@ -5,6 +5,7 @@ const baseSheet = "https://sheets.googleapis.com/v4/spreadsheets/1qM0BKuyzatI_v2
 const apiKey = "AIzaSyAA4WB41zB6JjoxoK9cB7qK-rtkbQsqpss"
 
 const defaultColor = "#007bff";
+const NUM_POSSIBLE_HUE = 360; // 6digit hexadecimal color
 
 const TANPA_KATEGORI = "-"
 
@@ -20,8 +21,51 @@ const showAllCategoryDefault = true;
 let categoryToShow = [];
 let poiAll = [];
 let itemsToShow = [];
+let colorCategory = {};
 
 let isLoading = true;
+
+/** Color */
+// input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1]
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');   // convert to Hex and prefix "0" if needed
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function generateEnoughColor(allCategory) {
+  const diff = NUM_POSSIBLE_HUE / allCategory.length
+
+  for (let i = 0; i < allCategory.length; i++) {
+    const it = allCategory[i];
+    const colorNumber = Math.floor(diff * i)
+    const color = hslToHex(colorNumber, 50, 50)
+    colorCategory[it.Nama] = color
+  }
+  console.log({diff, colorCategory});
+}
+/** End Color */
+
+
+/** Action */
+document.getElementById("btn-check").addEventListener("click", () => {
+  let els = document.querySelectorAll(".categoryandbanjar");
+  for (it of els) { 
+    it.checked = true;
+  }
+})
+document.getElementById("btn-uncheck").addEventListener("click", () => {
+  let els = document.querySelectorAll(".categoryandbanjar");
+  for (it of els) { 
+    it.checked = false;
+  }
+})
+/** End Action */
 
 const options = {
   lat: -8.4327307,
@@ -116,9 +160,9 @@ function mouseClicked() {
       };
 
       const modalDetail = document.getElementById("modal-detail");
-      if (it.description && it.description.length > 0) {
+      if (it.Deskripsi && it.Deskripsi.length > 0) {
         var md = window.markdownit();
-        fullContent = md.render(it.description);
+        fullContent = md.render(it.Deskripsi);
         // modalDetail.innerHTML = "";
         modalDetail.innerHTML = fullContent;
 
@@ -129,27 +173,27 @@ function mouseClicked() {
       }
 
       var titleEl = document.createElement("h3");
-      titleEl.innerText = it.nama;
+      titleEl.innerText = it.Nama ?? 'Tanpa Nama';
 
       var kategoriEl = document.createElement("h6");
-      if (it.category) {
-        kategoriEl.innerHTML = "<span>Kategori:</span> " + it.category.name;
+      if (it.Kategori) {
+        kategoriEl.innerHTML = "<span>Kategori:</span> " + it.Kategori;
       } else {
         kategoriEl.innerHTML = "<span>Kategori:</span> Tanpa Kategori";
       }
 
       var banjarEl = document.createElement("h6");
-      if (it.banjar) {
-        banjarEl.innerHTML = "<span>Banjar:</span> " + it.banjar.name;
+      if (it.Wilayah) {
+        banjarEl.innerHTML = "<span>Wilayah:</span> " + it.Wilayah;
       } else {
-        banjarEl.innerHTML = "<span>Banjar:</span> Tanpa banjar";
+        banjarEl.innerHTML = "<span>Wilayah:</span> -";
       }
 
       var latlngEl = document.createElement("h6");
-      if (it.lat && it.lng) {
-        latlngEl.innerHTML = "<span>Latlng:</span> " + it.lat + ", " + it.lng;
+      if (it.Lat && it.Lon) {
+        latlngEl.innerHTML = "<span>Lat Lon:</span> " + it.Lat + ", " + it.Lon;
       } else {
-        latlngEl.innerHTML = "<span>Latlng:</span> Belum ditambahkan";
+        latlngEl.innerHTML = "<span>Lat Lon:</span> Belum ditambahkan";
       }
 
       modalDetail.prepend(latlngEl);
@@ -167,6 +211,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   var _cb = document.createElement("INPUT");
   _cb.setAttribute("type", "checkbox");
   _cb.setAttribute("id", id);
+  _cb.classList.add("categoryandbanjar")
   if (showAllCategoryDefault) _cb.defaultChecked = true;
   _cb.addEventListener("click", onclickCheckbox);
 
@@ -197,7 +242,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   _cont.appendChild(_count);
 
   // Color Indikatornya
-  var _colorInd = document.createElement("span");
+  var _colorInd = document.createElement("div");
   _colorInd.classList.add(`colorIndicator`);
   if (color) {
     _colorInd.style["background-color"] = color;
@@ -216,7 +261,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
 }
 
 function createCheckboxes(level, cats, containerId, uncategorized) {
-  if (uncategorized && uncategorized.id != null && uncategorized.name != null) {
+  if (uncategorized && uncategorized.No != null && uncategorized.Nama != null) {
     appendCheckbox(
       uncategorized.id,
       uncategorized.name,
@@ -229,7 +274,13 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
   }
   for (const it of cats) {
     let _color = "#ff0000";
-    if (it.color) _color = it.color;
+    // if (it.color) _color = it.color;
+
+    if (containerId == 'catHierarchy') {
+      _color = colorCategory[it.Nama]
+    }
+
+    // console.log({z: it});
 
     appendCheckbox(it.Nama, it.Nama, level, it.Subs, containerId, _color);
     if (showAllCategoryDefault) categoryToShow.push(it.id);
@@ -272,6 +323,9 @@ async function preload() {
   async function loadCategory() {
     const getCategories = await authenticatedGet(baseSheet + "/Kategori!A:B")
     catAll = transformToObject((await getCategories.json()).values);
+    generateEnoughColor(catAll)
+
+    // console.log({catAll});
 
     // Root level
     const rootLevel = catAll.filter((v) => !v['Parent'])
@@ -302,7 +356,7 @@ async function preload() {
       }
     }
 
-    console.log({catAll, poiAll, rootLevel, categoryCounter});
+    // console.log({catAll, poiAll, rootLevel, categoryCounter, colorCategory});
 
 
 
@@ -339,7 +393,7 @@ function draw() {
   noStroke();
 
   if (regionAreas && regionAreas.length > 0) drawRegionAreas();
-  console.log({itemsToShow});
+  // console.log({itemsToShow});
   if (itemsToShow && itemsToShow.length > 0) drawItems();
 }
 
@@ -352,14 +406,16 @@ window.onresize = function () {
 };
 
 function drawItems() {
+  stroke(0, 0, 0);
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
-    console.log({it});
+    // console.log({it});
     const pix = trainMap.latLngToPixel(it.Lat, it.Lon);
     push();
 
-    if (it.category && it.category.color) {
-      fill(it.category.color);
+    if (it.Kategori) {
+      console.log({z: colorCategory[it.Kategori]});
+      fill(colorCategory[it.Kategori]);
     } else {
       // Default category color
       fill(defaultColor);

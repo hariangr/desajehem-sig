@@ -100,7 +100,7 @@ label {
 }
 
 .logos-logos {
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 
 .sidebar-title h4 {
@@ -120,14 +120,44 @@ label {
 }
 
 .colorIndicator {
+  border-style: solid;
   height: 15px;
   width: 15px;
   background-color: #bbb;
+  border-color: #000;
+  border-width: 1px;
   border-radius: 50%;
   display: inline-block;
   margin-left: 1em;
   vertical-align: middle;
 }
+
+.acti-acti {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-action {
+  display: inline-block;
+  outline: none;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 3px;
+  padding: 12px 24px;
+  border: 0;
+  color: #3a4149;
+  background: #e7ebee;
+  line-height: 1.15;
+  font-size: 16px;
+}
+
+.btn-action :hover {
+  transition: all .1s ease;
+  box-shadow: 0 0 0 0 #fff, 0 0 0 3px #1de9b6;
+}
+
 
 .bottomPadder {
   height: 5em;
