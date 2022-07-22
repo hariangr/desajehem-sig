@@ -14,11 +14,11 @@ let height;
 
 let regionAreas;
 let categoryHierarchy;
-let categoryCounter = [];
+let categoryCounter = {};
 let banjarCounter = [];
 const showAllCategoryDefault = true;
 let categoryToShow = [];
-let itemsAll = [];
+let poiAll = [];
 let itemsToShow = [];
 
 let isLoading = true;
@@ -32,7 +32,9 @@ const options = {
 
 function refreshItemsToShow() {
   itemsToShow = [];
-  itemsToShow = itemsAll.filter((v, i) => {
+  itemsToShow = poiAll.filter((v, i) => {
+    return true // TODO: HAPUS
+
     if (
       v.category == null &&
       v.banjar == null &&
@@ -178,9 +180,10 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   _cont.classList.add(`level${level}hierarchy`);
 
   // Counternya
+  // console.log("apalah", Object.keys(categoryCounter).includes(id), Object.keys(categoryCounter), id);
   var _count = document.createElement("span");
   if (id == TANPA_KATEGORI) {
-    _count.innerText = " (" + categoryCounter["undefined"] + ")";
+    _count.innerText = " (" + categoryCounter[TANPA_KATEGORI] + ")";
   } else if (id == "tanpa-banjar") {
     _count.innerText = " (" + banjarCounter["undefined"] + ")";
   } else if (Object.keys(categoryCounter).includes(id)) {
@@ -228,7 +231,7 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
     let _color = "#ff0000";
     if (it.color) _color = it.color;
 
-    appendCheckbox(it.No, it.Nama, level, it.subs, containerId, _color);
+    appendCheckbox(it.Nama, it.Nama, level, it.Subs, containerId, _color);
     if (showAllCategoryDefault) categoryToShow.push(it.id);
   }
 
@@ -281,13 +284,26 @@ async function preload() {
     poiAll = transformToObject((await getPoi.json()).values);
 
     // categoryHierarchy
-    // console.log({catAll, poiAll, rootLevel});
     categoryHierarchy = rootLevel
 
     // const getHierarchy = await fetch(
     //   baseUrl + "/sv-categories/hierarchywithcount"
     // );
     // const getHierarchyJson = await getHierarchy.json();
+
+    /** Category counts */
+    for (const poi of poiAll) {
+      // console.log({it});
+      // getHierarchy
+      if (Object.keys(categoryCounter).includes(poi["Kategori"])) {
+        categoryCounter[poi["Kategori"]]++;
+      } else {
+        categoryCounter[poi["Kategori"]] = 1;
+      }
+    }
+
+    console.log({catAll, poiAll, rootLevel, categoryCounter});
+
 
 
     // categoryHierarchy = await getHierarchyJson["categories"];
@@ -323,6 +339,7 @@ function draw() {
   noStroke();
 
   if (regionAreas && regionAreas.length > 0) drawRegionAreas();
+  console.log({itemsToShow});
   if (itemsToShow && itemsToShow.length > 0) drawItems();
 }
 
@@ -337,7 +354,8 @@ window.onresize = function () {
 function drawItems() {
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
-    const pix = trainMap.latLngToPixel(it.lat, it.lng);
+    console.log({it});
+    const pix = trainMap.latLngToPixel(it.Lat, it.Lon);
     push();
 
     if (it.category && it.category.color) {
