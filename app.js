@@ -1,6 +1,5 @@
 const mappa = new Mappa("Leaflet");
 
-const baseUrl = "https://angseri.herokuapp.com";
 const baseSheet = "https://sheets.googleapis.com/v4/spreadsheets/1qM0BKuyzatI_v2LJr4tgo0Nl5cAlVl1850KmoDhnVco/values"
 const apiKey = "AIzaSyAA4WB41zB6JjoxoK9cB7qK-rtkbQsqpss"
 
@@ -325,8 +324,6 @@ async function preload() {
     catAll = transformToObject((await getCategories.json()).values);
     generateEnoughColor(catAll)
 
-    // console.log({catAll});
-
     // Root level
     const rootLevel = catAll.filter((v) => !v['Parent'])
     // Level 1
@@ -340,11 +337,6 @@ async function preload() {
     // categoryHierarchy
     categoryHierarchy = rootLevel
 
-    // const getHierarchy = await fetch(
-    //   baseUrl + "/sv-categories/hierarchywithcount"
-    // );
-    // const getHierarchyJson = await getHierarchy.json();
-
     /** Category counts */
     for (const poi of poiAll) {
       // console.log({it});
@@ -356,12 +348,6 @@ async function preload() {
       }
     }
 
-    // console.log({catAll, poiAll, rootLevel, categoryCounter, colorCategory});
-
-
-
-    // categoryHierarchy = await getHierarchyJson["categories"];
-    // categoryCounter = await getHierarchyJson["counter"];
     createCheckboxes(0, categoryHierarchy, "catHierarchy");
   }
 
@@ -409,7 +395,6 @@ function drawItems() {
   stroke(0, 0, 0);
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
-    // console.log({it});
     const pix = trainMap.latLngToPixel(it.Lat, it.Lon);
     push();
 
