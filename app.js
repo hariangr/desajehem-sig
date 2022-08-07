@@ -135,6 +135,10 @@ function mouseClicked() {
 
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
+    if (!it.drawn || !it.drawn.x || !it.drawn.y){
+      continue
+    }
+
     const _d = dist(mouseX, mouseY, it.drawn.x, it.drawn.y);
 
     if (_d <= it.drawn.hb) {
