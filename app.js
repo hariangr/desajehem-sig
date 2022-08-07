@@ -395,11 +395,16 @@ function drawItems() {
   stroke(0, 0, 0);
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
+    if (!it.Lat || !it.Lon) {
+      console.log(`Skipping ${it}, due to no lat lon data`)
+      continue
+    }
+
     const pix = trainMap.latLngToPixel(it.Lat, it.Lon);
     push();
 
     if (it.Kategori) {
-      console.log({z: colorCategory[it.Kategori]});
+      // console.log({z: colorCategory[it.Kategori]});
       fill(colorCategory[it.Kategori]);
     } else {
       // Default category color
