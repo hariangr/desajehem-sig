@@ -202,12 +202,16 @@ function mouseClicked() {
       }
 
       var latlngEl = document.createElement("h6");
+      let directionEl = document.createElement("a")
       if (it.Lat && it.Lon) {
         latlngEl.innerHTML = "<span>Lat Lon:</span> " + it.Lat + ", " + it.Lon;
+        directionEl.text = "Direction"
+        directionEl.href = "https://www.google.com/maps/dir/?api=1&destination=" + it.Lat + "," + it.Lon
       } else {
         latlngEl.innerHTML = "<span>Lat Lon:</span> Belum ditambahkan";
       }
 
+      modalDetail.prepend(directionEl);
       modalDetail.prepend(latlngEl);
       modalDetail.prepend(banjarEl);
       modalDetail.prepend(kategoriEl);
