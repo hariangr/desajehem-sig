@@ -6,8 +6,8 @@ const apiKey = "AIzaSyAA4WB41zB6JjoxoK9cB7qK-rtkbQsqpss"
 const defaultColor = "#007bff";
 const NUM_POSSIBLE_HUE = 360; // 6digit hexadecimal color
 
-const TANPA_KATEGORI = "tanpa-kategori"
-const TANPA_BANJAR = "tanpa-banjar"
+const TANPA_KATEGORI = "Tanpa Kategori"
+const TANPA_BANJAR = "Tanpa Wilayah"
 
 let canvas;
 let width;
@@ -16,7 +16,7 @@ let height;
 let regionAreas;
 let categoryHierarchy;
 let categoryCounter = {};
-let banjarCounter = [];
+let banjarCounter = {};
 const showAllCategoryDefault = true;
 let categoryToShow = [];
 let poiAll = [];
@@ -47,7 +47,7 @@ function generateEnoughColor(allCategory) {
     const color = hslToHex(colorNumber, 50, 50)
     colorCategory[it.Nama] = color
   }
-  colorCategory['tanpa-kategori'] = diff * (allCategory.length + 1)
+  colorCategory[TANPA_KATEGORI] = diff * (allCategory.length + 1)
   // console.log({diff, colorCategory});
 }
 /** End Color */
@@ -87,10 +87,10 @@ function refreshItemsToShow() {
     // return true // TODO: HAPUS
 
     if (
-      v.Kategori &&
+      // v.Kategori &&
       // v.Wilayah &&
-      categoryToShow.includes(v.Kategori)
-      // categoryToShow.includes(v.Wilayah)
+      categoryToShow.includes(v.Kategori) &&
+      categoryToShow.includes(v.Wilayah)
     ) {
       return true;
     }
@@ -242,7 +242,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   if (id == TANPA_KATEGORI) {
     _count.innerText = " (" + categoryCounter[TANPA_KATEGORI] + ")";
   } else if (id == TANPA_BANJAR) {
-    _count.innerText = " (" + banjarCounter["undefined"] + ")";
+    _count.innerText = " (" + banjarCounter[TANPA_BANJAR] + ")";
   } else if (Object.keys(categoryCounter).includes(id)) {
     _count.innerText = " (" + categoryCounter[id] + ")";
   } else if (Object.keys(banjarCounter).includes(id)) {
@@ -330,7 +330,6 @@ async function preload() {
     const getBanjars = await authenticatedGet(baseSheet + "/Wilayah Bagian!A:B")
     banjarAll = transformToObject((await getBanjars.json()).values);
     banjarAll = banjarAll.filter((v) => v.Nama != "-")
-    createCheckboxes(0, banjarAll, "banjarHierarchy", {No: "tanpa-banjar", Nama: "Tanpa Banjar"});
   }
 
   async function loadCategory() {
@@ -367,18 +366,7 @@ async function preload() {
     // categoryHierarchy
     categoryHierarchy = rootLevel
 
-    /** Category counts */
-    for (const poi of poiAll) {
-      // console.log({it});
-      // getHierarchy
-      if (Object.keys(categoryCounter).includes(poi["Kategori"])) {
-        categoryCounter[poi["Kategori"]]++;
-      } else {
-        categoryCounter[poi["Kategori"]] = 1;
-      }
-    }
 
-    createCheckboxes(0, categoryHierarchy, "catHierarchy", {No: TANPA_KATEGORI, Nama: "Tanpa Kategori"});
   }
 
   document
@@ -389,6 +377,28 @@ async function preload() {
   await loadRegionArea()
   await loadBanjars()
   await loadCategory()
+
+
+  /** Category counts */
+  for (const poi of poiAll) {
+    // console.log({it});
+    // getHierarchy
+    if (Object.keys(categoryCounter).includes(poi["Kategori"])) {
+      categoryCounter[poi["Kategori"]]++;
+    } else {
+      categoryCounter[poi["Kategori"]] = 1;
+    }
+
+    if (Object.keys(banjarCounter).includes(poi["Wilayah"])) {
+      banjarCounter[poi["Wilayah"]]++;
+    } else {
+      banjarCounter[poi["Wilayah"]] = 1;
+    }
+  }
+
+
+  createCheckboxes(0, banjarAll, "banjarHierarchy", {No: TANPA_BANJAR, Nama: "Tanpa Wilayah"});
+  createCheckboxes(0, categoryHierarchy, "catHierarchy", {No: TANPA_KATEGORI, Nama: "Tanpa Kategori"});
 
   isLoading = false;
   document.getElementById("loadingIndicator").classList.add("hideLoading");
