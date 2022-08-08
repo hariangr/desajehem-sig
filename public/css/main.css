@@ -221,9 +221,9 @@ label {
   margin-bottom: 0;
 }
 
-#hamburgerMenu:hover {
+/* #hamburgerMenu:hover {
   scale: 2;
-}
+} */
 
 #hamburgerMenu:hover .bar {
   background-color: #000;
