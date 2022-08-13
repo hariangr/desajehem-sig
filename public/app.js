@@ -39,15 +39,16 @@ function hslToHex(h, s, l) {
 }
 
 function generateEnoughColor(allCategory) {
-  const diff = NUM_POSSIBLE_HUE / (allCategory.length + 1) // +1 karena ada 'tanpa-kategori'
+  const diff = NUM_POSSIBLE_HUE / (allCategory.length + 2) // +2 karena ada 'tanpa-kategori' dan just to be safe lagi satu
 
   for (let i = 0; i < allCategory.length; i++) {
     const it = allCategory[i];
-    const colorNumber = Math.floor(diff * i)
+    const colorNumber = Math.floor(diff * (i+1))
     const color = hslToHex(colorNumber, 50, 50)
     colorCategory[it.Nama] = color
   }
-  colorCategory[TANPA_KATEGORI] = diff * (allCategory.length + 1)
+  colorCategory[TANPA_KATEGORI] =  hslToHex(0, 50, 50)  
+  colorCategory[TANPA_BANJAR] =  hslToHex(0, 50, 50)  // Just error fix hack
 }
 /** End Color */
 
@@ -257,6 +258,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   if (color) {
     _colorInd.style["background-color"] = color;
   } else {
+    console.log("apa", text);
     _colorInd.style["background-color"] = defaultColor;
   }
   if (containerId != "banjarHierarchy") {
@@ -277,7 +279,8 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
       uncategorized.Nama,
       level,
       uncategorized.Subs,
-      containerId
+      containerId,
+      colorCategory[uncategorized.Nama]
     );
 
     if (showAllCategoryDefault) categoryToShow.push(uncategorized.Nama);
