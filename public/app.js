@@ -58,8 +58,8 @@ function generateEnoughJalanColor(jalanAll) {
 
   for (let i = 0; i < jalanAll.length; i++) {
     const it = jalanAll[i];
-    const colorNumber = Math.floor(diff * (i))
-    const color = hslToHex(colorNumber, 100, 100)
+    const colorNumber = Math.floor(diff * (jalanAll.length - i))
+    const color = hslToHex(colorNumber, 60, 60)
     colorJalan[it.Nama] = color
   }
 }
@@ -251,6 +251,7 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
 
   if (containerId == 'jalanCont') {
     _cb.classList.add("jalanCb")
+    _cb.defaultChecked = false;
   }
 
   var _label = document.createElement("label");
@@ -319,6 +320,9 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
     if (containerId == 'catHierarchy') {
       _color = colorCategory[it.Nama]
     }
+    if (containerId == 'jalanCont') {
+      _color = colorJalan[it.Nama]
+    }
 
     appendCheckbox(it.Nama, it.Nama, level, it.Subs, containerId, _color);
     if (showAllCategoryDefault) categoryToShow.push(it.Nama);
@@ -362,7 +366,6 @@ async function preload() {
     const getJalan = await authenticatedGet(baseSheet + "/Jalan!A:D")
     jalanAll = transformToObject((await getJalan.json()).values);
     generateEnoughJalanColor(jalanAll);
-    console.log({jalanAll});
   }
 
   async function loadCategory() {
@@ -488,6 +491,37 @@ function drawItems() {
     };
     pop();
   }
+
+  push();
+  for (const jln of jalanAll) {
+    if (jalanToShow.includes(jln.Nama)) {
+      try {
+        stroke(colorJalan[jln.Nama]);
+        strokeWeight(8);
+        // stroke(237, 34, 93);
+
+        const polis = jln.Polylines.split('\n')
+        for (let i = 1; i < polis.length; i++) {
+          const splittedA = polis[i - 1].split(',');
+          const splittedB = polis[i].split(',');
+
+          const __latA = splittedA[0]
+          const __lonA = splittedA[1]
+
+          const __latB = splittedB[0]
+          const __lonB = splittedB[1]
+
+          const pixA = trainMap.latLngToPixel(__latA, __lonA);
+          const pixB = trainMap.latLngToPixel(__latB, __lonB);
+
+          line(pixA.x, pixA.y, pixB.x, pixB.y);
+        }
+      } catch (error) {
+        console.warn("Data for jalan " + jln.Nama + " is not valid");
+      }
+    }
+  }
+  pop();
 }
 
 function drawRegionAreas() {
