@@ -48,7 +48,6 @@ function generateEnoughColor(allCategory) {
     colorCategory[it.Nama] = color
   }
   colorCategory[TANPA_KATEGORI] = diff * (allCategory.length + 1)
-  // console.log({diff, colorCategory});
 }
 /** End Color */
 
@@ -80,8 +79,6 @@ const options = {
 };
 
 function refreshItemsToShow() {
-  console.log({categoryToShow});
-
   itemsToShow = [];
   itemsToShow = poiAll.filter((v, i) => {
     // return true // TODO: HAPUS
@@ -122,7 +119,6 @@ function refreshItemsToShow() {
     //   return true;
     // }
 
-    // console.log("sisa", v);
     return false;
   });
 }
@@ -151,7 +147,6 @@ function mouseClicked() {
     const _d = dist(mouseX, mouseY, it.drawn.x, it.drawn.y);
 
     if (_d <= it.drawn.hb) {
-      // console.log(it);
       var modal = document.getElementById("myModal");
       // Get the <span> element that closes the modal
       var span = document.getElementsByClassName("close")[0];
@@ -241,7 +236,6 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   _cont.classList.add(`level${level}hierarchy`);
 
   // Counternya
-  // console.log("apalah", Object.keys(categoryCounter).includes(id), Object.keys(categoryCounter), id);
   var _count = document.createElement("span");
   if (id == TANPA_KATEGORI) {
     _count.innerText = " (" + categoryCounter[TANPA_KATEGORI] + ")";
@@ -296,8 +290,6 @@ function createCheckboxes(level, cats, containerId, uncategorized) {
       _color = colorCategory[it.Nama]
     }
 
-    // console.log({z: it});
-
     appendCheckbox(it.Nama, it.Nama, level, it.Subs, containerId, _color);
     if (showAllCategoryDefault) categoryToShow.push(it.Nama);
   }
@@ -351,7 +343,6 @@ async function preload() {
 
     const getPoi = await authenticatedGet(baseSheet + "/POI!A:G")
     poiAll = transformToObject((await getPoi.json()).values);
-    // console.log(poiAll);
     poiAll = poiAll.filter((v) => {
       return v.Nama && v.Lat && v.Lon
     })
@@ -365,7 +356,6 @@ async function preload() {
       }
 
     }
-    // console.log({poiAll});
 
     // categoryHierarchy
     categoryHierarchy = rootLevel
@@ -385,7 +375,6 @@ async function preload() {
 
   /** Category counts */
   for (const poi of poiAll) {
-    // console.log({it});
     // getHierarchy
     if (Object.keys(categoryCounter).includes(poi["Kategori"])) {
       categoryCounter[poi["Kategori"]]++;
@@ -423,7 +412,6 @@ function draw() {
   noStroke();
 
   if (regionAreas && regionAreas.length > 0) drawRegionAreas();
-  // console.log({itemsToShow});
   if (itemsToShow && itemsToShow.length > 0) drawItems();
 }
 
@@ -440,7 +428,6 @@ function drawItems() {
   for (let i = 0; i < itemsToShow.length; i++) {
     const it = itemsToShow[i];
     if (!it.Lat || !it.Lon) {
-      // console.log(`Skipping ${it}, due to no lat lon data`)
       continue
     }
 
@@ -448,7 +435,6 @@ function drawItems() {
     push();
 
     if (it.Kategori) {
-      // console.log({z: colorCategory[it.Kategori]});
       fill(colorCategory[it.Kategori]);
     } else {
       // Default category color
