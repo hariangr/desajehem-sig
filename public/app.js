@@ -22,6 +22,8 @@ let categoryToShow = [];
 let poiAll = [];
 let itemsToShow = [];
 let colorCategory = {};
+let colorJalan = {}
+let jalanToShow = [];
 
 let isLoading = true;
 
@@ -38,17 +40,28 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-function generateEnoughColor(allCategory) {
+function generateEnoughCatColor(allCategory) {
   const diff = NUM_POSSIBLE_HUE / (allCategory.length + 2) // +2 karena ada 'tanpa-kategori' dan just to be safe lagi satu
 
   for (let i = 0; i < allCategory.length; i++) {
     const it = allCategory[i];
-    const colorNumber = Math.floor(diff * (i+1))
+    const colorNumber = Math.floor(diff * (i + 1))
     const color = hslToHex(colorNumber, 50, 50)
     colorCategory[it.Nama] = color
   }
-  colorCategory[TANPA_KATEGORI] =  hslToHex(0, 50, 50)  
-  colorCategory[TANPA_BANJAR] =  hslToHex(0, 50, 50)  // Just error fix hack
+  colorCategory[TANPA_KATEGORI] = hslToHex(0, 50, 50)
+  colorCategory[TANPA_BANJAR] = hslToHex(0, 50, 50)  // Just error fix hack
+}
+
+function generateEnoughJalanColor(jalanAll) {
+  const diff = NUM_POSSIBLE_HUE / jalanAll.length
+
+  for (let i = 0; i < jalanAll.length; i++) {
+    const it = jalanAll[i];
+    const colorNumber = Math.floor(diff * (i))
+    const color = hslToHex(colorNumber, 100, 100)
+    colorJalan[it.Nama] = color
+  }
 }
 /** End Color */
 
@@ -128,10 +141,19 @@ function onclickCheckbox(params) {
   const checked = params.target.checked;
   if (checked) {
     // Become checked
-    categoryToShow.push(params.target.id);
+    if (params.target.classList.contains("jalanCb")) {
+      jalanToShow.push(params.target.id)
+    } else {
+      categoryToShow.push(params.target.id);
+    }
   } else {
-    categoryToShow.splice(categoryToShow.indexOf(params.target.id), 1);
+    if (params.target.classList.contains("jalanCb")) {
+      jalanToShow.splice(jalanToShow.indexOf(params.target.id), 1);
+    } else {
+      categoryToShow.splice(categoryToShow.indexOf(params.target.id), 1);
+    }
   }
+
 
   refreshItemsToShow();
 }
@@ -227,6 +249,10 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   if (showAllCategoryDefault) _cb.defaultChecked = true;
   _cb.addEventListener("click", onclickCheckbox);
 
+  if (containerId == 'jalanCont') {
+    _cb.classList.add("jalanCb")
+  }
+
   var _label = document.createElement("label");
   _label.setAttribute("for", id);
   _label.innerText = text;
@@ -246,6 +272,8 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
     _count.innerText = " (" + categoryCounter[id] + ")";
   } else if (Object.keys(banjarCounter).includes(id)) {
     _count.innerText = " (" + banjarCounter[id] + ")";
+  } else if (containerId == "jalanCont") {
+
   } else {
     _cont.classList.add("line-through");
     _label.classList.add("line-through");
@@ -258,7 +286,6 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   if (color) {
     _colorInd.style["background-color"] = color;
   } else {
-    console.log("apa", text);
     _colorInd.style["background-color"] = defaultColor;
   }
   if (containerId != "banjarHierarchy") {
@@ -331,11 +358,18 @@ async function preload() {
     banjarAll = banjarAll.filter((v) => v.Nama != "-")
   }
 
+  async function loadJalan() {
+    const getJalan = await authenticatedGet(baseSheet + "/Jalan!A:D")
+    jalanAll = transformToObject((await getJalan.json()).values);
+    generateEnoughJalanColor(jalanAll);
+    console.log({jalanAll});
+  }
+
   async function loadCategory() {
     const getCategories = await authenticatedGet(baseSheet + "/Kategori!A:B")
     catAll = transformToObject((await getCategories.json()).values);
     catAll = catAll.filter((v) => v.Nama != '-')
-    generateEnoughColor(catAll)
+    generateEnoughCatColor(catAll)
 
     // Root level
     const rootLevel = catAll.filter((v) => !v['Parent'])
@@ -374,6 +408,7 @@ async function preload() {
   await loadRegionArea()
   await loadBanjars()
   await loadCategory()
+  await loadJalan()
 
 
   /** Category counts */
@@ -395,6 +430,7 @@ async function preload() {
 
   createCheckboxes(0, banjarAll, "banjarHierarchy", {No: TANPA_BANJAR, Nama: "Tanpa Wilayah"});
   createCheckboxes(0, categoryHierarchy, "catHierarchy", {No: TANPA_KATEGORI, Nama: "Tanpa Kategori"});
+  createCheckboxes(0, jalanAll, "jalanCont");
 
   isLoading = false;
   document.getElementById("loadingIndicator").classList.add("hideLoading");
