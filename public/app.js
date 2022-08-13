@@ -71,7 +71,11 @@ document.getElementById("btn-check").addEventListener("click", () => {
   let els = document.querySelectorAll(".categoryandbanjar");
   for (it of els) {
     it.checked = true;
-    categoryToShow.push(it.id);
+    if (it.classList.contains("jalanCb")) {
+      jalanToShow.push(it.id)
+    } else {
+      categoryToShow.push(it.id);
+    }
   }
   refreshItemsToShow()
 })
@@ -81,6 +85,7 @@ document.getElementById("btn-uncheck").addEventListener("click", () => {
     it.checked = false;
   }
   categoryToShow = []
+  jalanToShow = []
   refreshItemsToShow()
 })
 /** End Action */
@@ -454,7 +459,7 @@ function draw() {
   noStroke();
 
   if (regionAreas && regionAreas.length > 0) drawRegionAreas();
-  if (itemsToShow && itemsToShow.length > 0) drawItems();
+  if ((itemsToShow && itemsToShow.length > 0) || (jalanToShow && jalanToShow.length > 0)) drawItems();
 }
 
 window.onresize = function () {
