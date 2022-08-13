@@ -373,6 +373,26 @@ async function preload() {
     generateEnoughJalanColor(jalanAll);
   }
 
+  async function loadRelevants() {
+    const getRelevants = await authenticatedGet(baseSheet + "/Relevant!A:B")
+    relevantAll = transformToObject((await getRelevants.json()).values);
+
+    const cont = document.getElementById("relevanceCont");
+
+    for (const it of relevantAll) {
+      try {
+        var link = document.createElement("a");
+        link.setAttribute("href", it.Link);
+        link.classList.add("relevanceLink");
+        link.innerText = it.Nama;
+        cont.appendChild(link)
+      } catch (error) {
+
+      }
+    }
+
+  }
+
   async function loadCategory() {
     const getCategories = await authenticatedGet(baseSheet + "/Kategori!A:B")
     catAll = transformToObject((await getCategories.json()).values);
@@ -417,6 +437,7 @@ async function preload() {
   await loadBanjars()
   await loadCategory()
   await loadJalan()
+  await loadRelevants()
 
 
   /** Category counts */
