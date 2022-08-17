@@ -27,6 +27,42 @@ let jalanToShow = [];
 
 let isLoading = true;
 
+let currentLat, currentLng;
+let locatorSvg;
+
+/** GPS */
+function showCurrentLocation() {
+  if (navigator.geolocation) {
+    try {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          if (latitude == undefined || longitude == undefined) return;
+          currentLat = latitude;
+          currentLng = longitude;
+          console.log("updated location");
+        },
+        (error) => {
+          // Do nothing
+          console.log("failed getting current position");
+        },
+        {timeout: 10000, enableHighAccuracy: true}
+      );
+    } catch (error) {
+
+    }
+  }
+}
+
+document.onreadystatechange = function () {
+  if (document.readyState == "complete") {
+    showCurrentLocation()
+  } else {
+    // Do nothing
+  }
+};
+
 /** Color */
 // input: h in [0,360] and s,v in [0,1] - output: r,g,b in [0,1]
 function hslToHex(h, s, l) {
@@ -356,6 +392,8 @@ async function authenticatedGet(endpoint) {
 }
 
 async function preload() {
+  locatorSvg = loadImage("./img/position.svg");
+
   async function loadRegionArea() {
     const regionRes = (await (await authenticatedGet(baseSheet + "/Wilayah!A:B")).json()).values
     regionAreas = transformToObject(regionRes)
@@ -481,6 +519,18 @@ function draw() {
 
   if (regionAreas && regionAreas.length > 0) drawRegionAreas();
   if ((itemsToShow && itemsToShow.length > 0) || (jalanToShow && jalanToShow.length > 0)) drawItems();
+
+  if (currentLat && currentLng) {
+    try {
+      push()
+      const pix = trainMap.latLngToPixel(currentLat, currentLng);
+      imageMode(CENTER);
+      image(locatorSvg, pix.x, pix.y, 30, 30);
+      pop()
+    } catch (error) {
+    }
+  }
+
 }
 
 window.onresize = function () {
