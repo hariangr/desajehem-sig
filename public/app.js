@@ -104,11 +104,10 @@ function generateEnoughJalanColor(jalanAll) {
 
 /** Action */
 document.getElementById("btn-check").addEventListener("click", () => {
-  let els = document.querySelectorAll(".categoryandbanjar");
+  let els = document.querySelectorAll(".categoryaja");
   for (it of els) {
     it.checked = true;
     if (it.classList.contains("jalanCb")) {
-      jalanToShow.push(it.id)
     } else {
       categoryToShow.push(it.id);
     }
@@ -116,12 +115,14 @@ document.getElementById("btn-check").addEventListener("click", () => {
   refreshItemsToShow()
 })
 document.getElementById("btn-uncheck").addEventListener("click", () => {
-  let els = document.querySelectorAll(".categoryandbanjar");
+  let els = document.querySelectorAll(".categoryaja");
   for (it of els) {
     it.checked = false;
+    console.log({id: it.id});
+    if (categoryToShow.includes(it.id)) {
+      categoryToShow.splice(categoryToShow.indexOf(it.id), 1);
+    }
   }
-  categoryToShow = []
-  jalanToShow = []
   refreshItemsToShow()
 })
 /** End Action */
@@ -293,6 +294,10 @@ function appendCheckbox(id, text, level, subs, containerId, color) {
   if (containerId == 'jalanCont') {
     _cb.classList.add("jalanCb")
     _cb.defaultChecked = false;
+  }
+
+  if (containerId == 'catHierarchy') {
+    _cb.classList.add("categoryaja")
   }
 
   var _label = document.createElement("label");
